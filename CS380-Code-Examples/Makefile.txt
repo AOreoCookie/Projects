@@ -1,0 +1,8 @@
+all:
+				gcc -o pr1 pr1.c -Wall
+
+clean:
+				rm pr1
+
+test:
+				time -p ./pr1 gas.csv p g

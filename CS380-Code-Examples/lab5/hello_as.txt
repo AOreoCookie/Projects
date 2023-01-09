@@ -1,0 +1,18 @@
+	.file	"hello_as.s"
+
+	.section	.rodata
+.LC0:
+	.string	"Hello World!"
+
+	.text
+.global main
+	.type	main, @function
+main:
+	push	%rbp
+	mov 	%rsp, %rbp
+	sub	$16, %rsp
+	mov	$.LC0, %rdi
+	call	puts
+	mov	$0, %rax
+	leave
+	ret

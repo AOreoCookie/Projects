@@ -1,0 +1,23 @@
+	.file	"fizz.s"
+
+	.section	.rodata
+.LC0:
+	.string	"Fizz!"
+
+.LC1:
+	.string "Buzz!"
+
+	.text
+.global main
+	.type	main, @function
+main:
+	push	%rbp
+	mov 	%rsp, %rbp
+	sub	$16, %rsp
+	mov	$.LC0, %rdi
+	call	puts
+	mov 	$.LC1, %rdi
+	call	puts
+	mov	$0, %rax
+	leave
+	ret

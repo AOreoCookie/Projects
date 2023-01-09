@@ -1,0 +1,43 @@
+	.file	"buzz.s"
+
+	.section	.rodata
+.LC0:
+	.string	"Fizz (%d)\n"
+
+.LC1:
+	.string "Buzz (%d)\n"
+
+	.text
+.global main
+	.type	main, @function
+main:
+	push	%rbp
+	mov 	%rsp, %rbp
+	push 	%rbx
+	push	%rsi
+	sub	$64, %rsp
+	mov	$1, %rbx
+	mov 	$10, %r12
+	cmp	%r12, %rbx
+	jg	L4
+L2:
+	mov 	%rbx, %rsi
+	mov 	%rsi, %rax
+	and 	$1, %rax
+	cmp	$0, %rax
+	je	L3
+	mov 	$.LC1, %rdi
+	call	printf
+	add 	$1, %rbx 	# Iterator (LOOP)
+	cmp 	%r12, %rbx
+ 	jle	L2
+L3:
+	mov 	$.LC0, %rdi
+	call 	printf
+	add	$1, %rbx
+	cmp	%r12, %rbx
+	jle	L2
+L4:
+	mov 	$0, %rax
+	leaveq
+	retq

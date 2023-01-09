@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define LINE_MAX 1024
+
+const char* getfield(char* line, int num) {
+  const char* tok;
+  for (tok = strtok(line, ","); tok && *tok; tok = strtok(NULL, ",")) if (!--num) return tok;
+  return NULL;
+}
+
+void generateFile(FILE *fp, char *line, const char* stateOn, const char* stateOff, const char* type, char* filenameOn, char* filenameOff) {
+  int arrOn[15] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int arrOff[15] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  while (fgets(line, LINE_MAX, fp)) {
+    char* tmp = strdup(line);
+    char* tmp2 = strdup(line);
+    const char* state = getfield(tmp, 5);
+    const char* label = getfield(tmp2, 7);
+    if (strcmp(label, type) == 0 && strcmp(state, stateOn) == 0) {
+      int index = 0;
+      float i, j;
+      char* ptr;
+      char* tmp3 = strdup(line);
+      double psi = strtod(getfield(tmp3, 3), &ptr);
+      for (i = 0, j = 2; j <= 30; i+=2, j+=2, index++) {
+        if (i < psi && psi < j) arrOn[index] = arrOn[index] + 1;
+        else continue;
+      }
+      free(tmp3);
+    } 
+    else if (strcmp(label, type) == 0 && strcmp(state, stateOff) == 0) {
+      int index = 0;
+      double i, j;
+      char* ptr;
+      char* tmp3 = strdup(line);
+      double psi = strtod(getfield(tmp3, 3), &ptr);
+      for (i = 0, j = 2; j <= 30; i+=2, j+=2, index++) {
+        if (i < psi && psi < j) arrOff[index] = arrOff[index] + 1; 
+        else continue;
+      }
+      free(tmp3);
+    }
+    free(tmp);
+    free(tmp2);
+  }
+  // WRITE TO '##_on_hist.txt'
+  FILE *f = fopen(filenameOn, "w");
+  if (f == NULL) {
+    printf("Error opening file!\n");
+    exit(1);
+  }
+  int index = 0;
+  int i, j;
+  fprintf(f, "statistics for on histogram:\n");
+  for (i = 0, j = 2; i <= 28; i+=2, j+=2, index++) fprintf(f, "[%i,%i): %i\n", i, j, arrOn[index]);
+  fclose(f);
+
+  // WRITE TO '##_off_hist.txt'
+  FILE *f2 = fopen(filenameOff, "w");
+  if (f2 == NULL) {
+    printf("Error opening file!\n");
+    exit(1);
+  }
+  index = 0;
+  i = 0;
+  j = 0;
+  fprintf(f2, "statistics for off histogram:\n");
+  for (i = 0, j = 2; i <= 28; i+=2, j+=2, index++) fprintf(f2, "[%i,%i): %i\n", i, j, arrOff[index]);
+  fclose(f2);
+}
+
+int main(int argc, char *argv[]) {
+  if (argc > 4 || argc < 4 || strcmp(argv[1], "gas.csv") != 0) {
+    fprintf(stderr, "Usage: ./pr1 <filename.csv> <type [s/p]> <pumpstate [g/b]>\n");
+    fprintf(stderr, "<filename.csv> is the named file 'gas.csv'\n");
+  }
+  else if (argc == 4 && strcmp(argv[1], "gas.csv") == 0) { // Correct arguments continues with program 
+  // Reads the gas.csv
+    FILE *fp = fopen(argv[1], "r");
+    if (!fp) {
+      fprintf(stderr, "Error opening file! Incorrect filename or type\n");
+      fprintf(stderr, "<filename.csv> is the named file 'gas.csv'\n");
+      exit(1);
+    }
+    else {
+      char line[LINE_MAX];
+      if (strcmp(argv[2], "p") == 0 && strcmp(argv[3], "g") == 0) generateFile(fp, line, "OnPumpState", "OffPumpState", "Good\n", "pg_on_hist.txt", "pg_off_hist.txt");
+      else if (strcmp(argv[2], "p") == 0 && strcmp(argv[3], "b") == 0) generateFile(fp, line, "OnPumpState", "OffPumpState", "Bad\n", "pb_on_hist.txt", "pb_off_hist.txt");
+      else if (strcmp(argv[2], "s") == 0 && strcmp(argv[3], "g") == 0) generateFile(fp, line, "OnSolenoidState", "OffSolenoidState", "Good\n", "sg_on_hist.txt", "sg_off_hist.txt");
+      else if (strcmp(argv[2], "s") == 0 && strcmp(argv[3], "b") == 0) generateFile(fp, line, "OnSolenoidState", "OffSolenoidState", "Bad\n", "sb_on_hist.txt", "sb_off_hist.txt");
+      else {
+        fprintf(stderr, "Usage: ./pr1 <filename.csv> <type [s/p]> <pumpstate [g/b]>\n");
+        fprintf(stderr, "<filename.csv> is the named file 'gas.csv'\n");
+      }
+    }
+  }
+  return 0;
+}
+
+/* Works Cited
+“Command Line Arguments.” C, www.tutorialspoint.com/cprogramming/c_command_line_arguments.htm.
+
+Mysticial. “How to Convert String to Float?” Stack Overflow, Stack Overflow, 10 Sept. 2013, 
+16:47, stackoverflow.com/questions/7951019/how-to-convert-string-to-float.
+
+Sehe. “Read .Csv File in C.” Stack Overflow, Stack Overflow, 16 Oct. 2012, 
+stackoverflow.com/questions/12911299/read-csv-file-in-c.
+*/

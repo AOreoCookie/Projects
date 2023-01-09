@@ -1,0 +1,79 @@
+	.file	"fizzbuzz.s"
+
+	.section	.rodata
+.LC0:
+	.string	"Fizz (%d)\n"
+
+.LC1:
+	.string "Buzz (%d)\n"
+
+.LC2:
+	.string "%d\n"
+
+.LC3:
+	.string "FizzBuzz (%d)\n"
+
+	.text
+.global main
+	.type	main, @function
+main:
+	push	%rbp
+	mov 	%rsp, %rbp
+	push 	%rbx
+	push	%rsi
+	sub	$16, %rsp
+	mov	$1, %rbx
+	mov 	$26, %r12
+	cmp	%r12, %rbx
+	jg	L7
+L2:
+	mov	%rbx, %rsi
+	mov	%rsi, %rax
+	cmp 	%r12, %rbx
+	jg	L7
+	mov 	$0, %rdx
+	mov	$6, %rbx
+	div	%rbx
+	mov	%rdx, %rax
+	mov	%rsi, %rbx
+	cmp	$0, %rax
+	je 	L5
+	mov	%rsi, %rax
+	and	$1, %rax
+	cmp 	$0, %rax
+	je	L3
+	mov 	%rsi, %rax
+	mov	$0, %rdx
+	mov	$3, %rbx
+	div	%rbx
+	mov 	%rdx, %rax
+	mov 	%rsi, %rbx
+	cmp	$0, %rax
+	je	L4
+	mov 	$.LC2, %rdi
+	call	printf
+	jmp	L6
+L3:				#Fizz
+	mov	$.LC0, %rdi
+	mov 	%rbx, %rsi
+	call	printf
+	jmp	L6
+L4:				#Buzz
+	mov	$.LC1, %rdi
+	mov 	%rbx, %rsi
+	call	printf
+	jmp	L6
+L5:				#FizzBuzz
+	mov	$.LC3, %rdi
+	mov	%rbx, %rsi
+	call 	printf
+	jmp	L6
+L6:
+	add	$1, %rbx
+	cmp	%r12, %rbx
+	je	L7
+	jmp	L2
+L7:
+	mov 	$0, %rax
+	leaveq
+	retq
